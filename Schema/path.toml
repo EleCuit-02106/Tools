@@ -1,0 +1,15 @@
+[tool.path]
+
+  # 個人個人自分の親リポジトリ絶対パスを入力する
+  root = "/Users/kazuaki/Documents/develop/youriko/KANJI/"
+
+  [tool.path.relative] # root からの相対パス
+    client    = "KANJI-client/"
+    dx4siv3d  = "KANJI-client/Game/KANJI/dx4siv3d/"
+    asset     = "KANJI-client/Game/KANJI/KANJI-asset/"
+    schema    = "KANJI-client/Game/KANJI/KANJI-asset/schema/"
+    md        = "KANJI-client/Game/KANJI/KANJI-asset/schema/master/"
+    md_toml   = "KANJI-client/Game/KANJI/KANJI-asset/schema/master/masterdata.toml"
+    md_class  = "KANJI-client/Game/KANJI/KANJI-asset/schema/master/class/"
+    md_header = "KANJI-client/Game/KANJI/KANJI-asset/schema/master_header/"
+    tool      = "tool/"
