@@ -3,7 +3,7 @@
 
 from pathlib import Path
 import toml
-from repository_path import KanjiPath
+from repository_path import ProjectPath
 from master_type import MDTypeManager, MDTypeInfo
 from logging import getLogger, basicConfig, DEBUG, INFO
 logger = getLogger(__name__)
@@ -11,7 +11,7 @@ logger = getLogger(__name__)
 
 class MDValidator:
     def __init__(self):
-        self.root_path = KanjiPath.absolute('md_class')
+        self.root_path = ProjectPath.absolute('md_class')
         self.type_mgr = MDTypeManager()
 
     def validate(self):
@@ -33,7 +33,7 @@ class MDValidator:
         for key in data: # key = yama, tera, ...
             record = data[key] # e.g. { 'id': 0, 'character': '山', ...}
             type_info = type_info_list[type_name] # e.g. { 'id': MDField(id, KanjiID), ... }
-            if not self.vaildate_necessary_and_sufficient(key, record, type_info):
+            if not self.validate_necessary_and_sufficient(key, record, type_info):
                 data_have_error.append('%s::%s' % (type_name, key))
         if len(data_have_error) == 0:
             logger.info('All data is validated : %d records in %s' % (len(data), toml_name))
@@ -48,11 +48,11 @@ class MDValidator:
         return dict_toml['masterdata']
 
     # type_infoで定義されているfieldとrecordの持つfieldが必要十分か
-    def vaildate_necessary_and_sufficient(self, key:str, record:dict, type_info:MDTypeInfo) -> bool:
-        return self.vaildate_sufficient(key, record, type_info) and self.vaildate_necessary(key, record, type_info)
+    def validate_necessary_and_sufficient(self, key:str, record:dict, type_info:MDTypeInfo) -> bool:
+        return self.validate_sufficient(key, record, type_info) and self.validate_necessary(key, record, type_info)
 
     # type_infoで定義されているfieldがすべてrecordに含まれているか
-    def vaildate_sufficient(self, key:str, record:dict, type_info:MDTypeInfo) -> bool:
+    def validate_sufficient(self, key:str, record:dict, type_info:MDTypeInfo) -> bool:
         lack_fields = list()
         for necessary_field in type_info.fields:
             if not necessary_field in record:
@@ -64,7 +64,7 @@ class MDValidator:
         return len(lack_fields) == 0
 
     # recordに入稿されているfieldがすべてtype_infoに含まれているか
-    def vaildate_necessary(self, key:str, record:dict, type_info:MDTypeInfo) -> bool:
+    def validate_necessary(self, key:str, record:dict, type_info:MDTypeInfo) -> bool:
         unnecessary_fields = list()
         for exist_field in record:
             if not exist_field in type_info.fields:

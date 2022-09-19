@@ -2,15 +2,15 @@
 #coding:utf-8
 
 import toml
-from repository_path import KanjiPath
+from repository_path import ProjectPath
 from logging import getLogger, basicConfig, DEBUG
 logger = getLogger(__name__)
 import pprint
 
 class MDField:
-    VALID_TYPE_NAMES = ('int', 'float', 'double', 'string', 'Vec2')
-    TYPE_DICT = {'string': 's3d::String', 'Vec2': 's3d::Vec2'}
-    HEAVY_OBJECT = ('string', 'Vec2')
+    VALID_TYPE_NAMES = ('int', 'float', 'string', 'Vec2', 'Vec3')
+    TYPE_DICT = {'string': 'String', 'Vec2': 'Vector2', 'Vec3': 'Vector3' }
+    HEAVY_OBJECT = ('string', 'Vec2', 'Vec3')
 
     def __init__(self, name:str, type_attribute:str):
         self.name = name
@@ -29,8 +29,7 @@ class MDField:
         self.raw_type, self.pass_type = self.read_types()
 
     # 型情報はtoml上では属性と一体化したただの文字列なので解析する
-    # 返り値の場合はconst&付けたりもする
-    def read_types(self) -> (str, str):
+    def read_types(self) -> tuple[str, str]:
         # メンバ変数の型
         if self.is_id:
             raw_type = self.type_name + 'ID'
@@ -41,17 +40,18 @@ class MDField:
                 raw_type = self.type_name
         # 引数/返り値の型
         if self.type_name in MDField.HEAVY_OBJECT:
-            pass_type = 'const %s&' % raw_type
+            pass_type = raw_type # TOdO: in/out
         else:
             pass_type = raw_type
         return (raw_type, pass_type)
 
 
 class MDTypeInfo:
-    INCLUDE = {'Vec2': '<Siv3D/Vector2D.hpp>'}
+    USING = { 'Vec2': 'UnityEngine', 'Vec3': 'UnityEngine' }
 
-    def __init__(self, toml:dict):
-        self.data_type_name = toml['data_type_name']
+    def __init__(self, namespace:str, data_type_name:str, toml:dict):
+        self.namespace = namespace
+        self.data_type_name = data_type_name
         self.primary_key = None
         self.types_requires_include = list()
         self.fields = self.read_fields(toml['field'])
@@ -65,17 +65,17 @@ class MDTypeInfo:
                 if self.primary_key != None:
                     logger.critical('There are multiple primary keys.')
                 self.primary_key = field.name
-            if field.type_name in MDTypeInfo.INCLUDE and not field.type_name in self.types_requires_include:
+            if field.type_name in MDTypeInfo.USING and not field.type_name in self.types_requires_include:
                 self.types_requires_include.append(field.type_name)
         if self.primary_key == None:
             logger.critical('There is no primary key.')
         return fields
 
-    def include_files(self):
-        include_files = list()
+    def using_list(self):
+        using_list = list()
         for type_name in self.types_requires_include:
-            include_files.append(MDTypeInfo.INCLUDE[type_name])
-        return include_files
+            using_list.append(MDTypeInfo.USING[type_name])
+        return using_list
 
     def log(self):
         print('// %s --------------------' % self.data_type_name)
@@ -103,23 +103,23 @@ class MDTypeManager:
         pprint.pprint(self.dict_info)
 
     def load(self):
-        with open(KanjiPath.absolute('md_toml')) as f:
+        with open(ProjectPath.absolute('md_toml')) as f:
             self.dict_toml = toml.load(f)
 
     def read(self, dict_toml:dict, parent_keys:str):
         for key in dict_toml:
-            if key.startswith('md_'):
-                md = MDTypeInfo(dict_toml[key])
+            if 'field' in dict_toml[key]:
+                md = MDTypeInfo(parent_keys.replace('/', '.'), key, dict_toml[key])
                 if len(parent_keys) == 0:
                     self.dict_info[MDTypeManager.ROOT][md.data_type_name] = md
                 else:
                     self.dict_info[parent_keys][md.data_type_name] = md
             else:
-                fullkey = self.fullkey(key, parent_keys)
-                self.dict_info[fullkey] = dict()
-                self.read(dict_toml[key], fullkey)
+                full_key = self.full_key(key, parent_keys)
+                self.dict_info[full_key] = dict()
+                self.read(dict_toml[key], full_key)
 
-    def fullkey(self, key:str, parent_keys:str):
+    def full_key(self, key:str, parent_keys:str) -> str:
         if len(parent_keys) == 0:
             return key
         else:

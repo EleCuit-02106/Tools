@@ -6,25 +6,25 @@ import toml
 import pprint
 
 # path.tomlに定義したパスを簡単に呼び出せるように
-class KanjiPath:
+class ProjectPath:
     root = Path()
-    pathes = dict()
+    paths = dict()
 
     @classmethod
     def load(cls):
         with open('path.toml', 'r') as f:
-            pathes_toml = toml.load(f)
-        pathes_toml = pathes_toml['tool']['path']
-        cls.root = Path(pathes_toml['root'])
-        for key, path in pathes_toml['relative'].items():
-            cls.pathes[key] = Path(path)
+            paths_toml = toml.load(f)
+        paths_toml = paths_toml['tool']['path']
+        cls.root = Path(paths_toml['root'])
+        for key, path in paths_toml['relative'].items():
+            cls.paths[key] = Path(path)
 
     @classmethod
     def absolute(cls, key) -> Path:
-        return cls.root / cls.pathes[key]
+        return cls.root / cls.paths[key]
 
-KanjiPath.load()
+ProjectPath.load()
 
 if __name__ == "__main__":
-    print('root: %s' % KanjiPath.root)
-    pprint.pprint(KanjiPath.pathes)
+    print('root: %s' % ProjectPath.root)
+    pprint.pprint(ProjectPath.paths)

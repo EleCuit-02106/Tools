@@ -3,6 +3,7 @@
 
 import sys
 import toml
+from repository_path import ProjectPath
 
 class IdInfo:
     def __init__(self, name:str, begin:int, end:int):
@@ -22,13 +23,11 @@ class IdInfo:
 
 
 class IdManager:
-    ID_TOML = 'KANJI-asset/schema/master/id.toml'
-
     def __init__(self):
         self.dict_toml = self.load()
 
     def load(self):
-        return toml.load(open(IdManager.ID_TOML))
+        return toml.load(open(ProjectPath.absolute('mdid_toml')))
 
     def search_id_by_int(self, id:int):
         for value in self.dict_toml['id'].values():
