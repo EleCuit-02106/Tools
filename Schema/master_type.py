@@ -21,6 +21,7 @@ class MDField:
         for attribute in attributes:
             if attribute == 'ID':
                 self.is_id = True
+                self.type_name = 'ID.' + self.type_name
             if attribute == 'PKey':
                 self.is_primary_key = True
         if not self.is_id:

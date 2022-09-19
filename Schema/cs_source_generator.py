@@ -82,8 +82,8 @@ class DataCsGenerator(CsSourceGeneratorBase):
             if field.is_id:
                 need_ids_using = True
         self.usings:str = ''
-        if need_ids_using:
-            self.usings += self.using_line('MD.ID')
+        # if need_ids_using:
+        #     self.usings += self.using_line('MD.ID')
         for using in md_type_info.using_list():
             self.usings += self.using_line(using)
 
@@ -134,8 +134,8 @@ class RepositoryCsGenerator(CsSourceGeneratorBase):
         # self.usings += '#include "MasterDataRepository.hpp"\n'
         # self.usings += '#include "Master%s.hpp"\n' % md_type_info.data_type_name
         self.usings:str = ''
-        if need_ids_using:
-            self.usings += 'using MD.ID;\n'
+        # if need_ids_using:
+        #     self.usings += 'using MD.ID;\n'
         self.usings += 'using du.MD;\n'
 
     def generate_class_body(self, data_type_name:str, field_dict:dict):
