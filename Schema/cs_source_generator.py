@@ -96,11 +96,11 @@ class DataCsGenerator(CsSourceGeneratorBase):
             raw_type = field.raw_type
             pass_type = field.pass_type
             property_name = self.camel_to_pascal_case(field.name)
-            # e.g. public String Label { get; }
+            # e.g. public string Label { get; }
             properties += self.indent * 2 + 'public %s %s { get; }\n' % (pass_type, property_name)
-            # e.g. private String m_label;
+            # e.g. private string m_label;
             # fields  += self.indent + '%s m_%s;\n' % (raw_type, field.name)
-            # e.g. MasterHoge(String label, ... ) {
+            # e.g. MasterHoge(string label, ... ) {
             ctor_declaration += self.indent * 3 + '%s %s,\n' % (pass_type, field.name)
             # e.g. Label = label;
             ctor_definition += self.indent * 3 + '%s = %s;\n' % (property_name, field.name)

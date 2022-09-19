@@ -9,7 +9,7 @@ import pprint
 
 class MDField:
     VALID_TYPE_NAMES = ('int', 'float', 'string', 'Vec2', 'Vec3')
-    TYPE_DICT = {'string': 'String', 'Vec2': 'Vector2', 'Vec3': 'Vector3' }
+    TYPE_DICT = { 'Vec2': 'Vector2', 'Vec3': 'Vector3' }
     HEAVY_OBJECT = ('string', 'Vec2', 'Vec3')
 
     def __init__(self, name:str, type_attribute:str):
