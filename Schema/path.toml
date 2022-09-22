@@ -13,4 +13,5 @@
     mdid_toml  = "Client/EleCuit/Assets/Data/Schemas/Master/id.toml"
     md_class   = "Client/EleCuit/Assets/Data/Schemas/Master/Classes/"
     md_impl    = "Client/EleCuit/Assets/Data/Schemas/MasterImpl/" # .toml から生成後の .cs
+    md_json    = "Client/EleCuit/Assets/Data/Master/Json/" # Spreadsheet 等から読みだした .json
     tool       = "Client/Tools/"
