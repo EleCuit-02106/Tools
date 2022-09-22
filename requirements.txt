@@ -1,0 +1,5 @@
+toml
+python-rapidjson
+gspread
+oauth2client
+PyDrive2

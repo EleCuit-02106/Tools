@@ -1,0 +1,17 @@
+[tool.path]
+
+  # 個人個人自分の親リポジトリ絶対パスを入力する
+  root = "/Users/kazuaki/develop/Unity/EleCuit/EleCuit/"
+
+  [tool.path.relative] # root からの相対パス
+    client     = "Client/"
+    dunitility = "Client/EleCuit/Internals/dUnitility/"
+    asset      = "Client/EleCuit/Assets/"
+    schema     = "Client/EleCuit/Assets/Data/Schemas/"
+    md         = "Client/EleCuit/Assets/Data/Schemas/Master/" # .cs 生成元の .toml
+    md_toml    = "Client/EleCuit/Assets/Data/Schemas/Master/masterdata.toml"
+    mdid_toml  = "Client/EleCuit/Assets/Data/Schemas/Master/id.toml"
+    md_class   = "Client/EleCuit/Assets/Data/Schemas/Master/Classes/"
+    md_impl    = "Client/EleCuit/Assets/Data/Schemas/MasterImpl/" # .toml から生成後の .cs
+    md_json    = "Client/EleCuit/Assets/Data/Master/Json/" # Spreadsheet 等から読みだした .json
+    tool       = "Client/Tools/"
