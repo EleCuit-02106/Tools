@@ -1,0 +1,15 @@
+client_config_backend: file
+client_config_file: secrets/client_secrets.json # settings.yaml からの相対パス
+
+# 2回目以降はブラウザでの操作なしに認証可能にする設定
+save_credentials: True
+save_credentials_backend: file
+save_credentials_file: secrets/credentials.json # settings.yaml からの相対パス
+
+get_refresh_token: True
+
+oauth_scope:
+  - https://www.googleapis.com/auth/drive.file
+  - https://www.googleapis.com/auth/drive.install
+  - https://www.googleapis.com/auth/drive.metadata
+
