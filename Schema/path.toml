@@ -8,9 +8,9 @@
     dunitility = "Client/EleCuit/Internals/dUnitility/"
     asset      = "Client/EleCuit/Assets/"
     schema     = "Client/EleCuit/Assets/Data/Schemas/"
-    md         = "Client/EleCuit/Assets/Data/Schemas/Master/" # 生成元
+    md         = "Client/EleCuit/Assets/Data/Schemas/Master/" # .cs 生成元の .toml
     md_toml    = "Client/EleCuit/Assets/Data/Schemas/Master/masterdata.toml"
     mdid_toml  = "Client/EleCuit/Assets/Data/Schemas/Master/id.toml"
     md_class   = "Client/EleCuit/Assets/Data/Schemas/Master/Classes/"
-    md_impl    = "Client/EleCuit/Assets/Data/Schemas/MasterImpl/" # 生成後
+    md_impl    = "Client/EleCuit/Assets/Data/Schemas/MasterImpl/" # .toml から生成後の .cs
     tool       = "Client/Tools/"
