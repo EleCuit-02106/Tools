@@ -136,7 +136,7 @@ class RepositoryCsGenerator(CsSourceGeneratorBase):
         self.usings:str = ''
         # if need_ids_using:
         #     self.usings += 'using MD.ID;\n'
-        self.usings += 'using du.MD;\n'
+        self.usings += 'using System.Collections.Generic;\n'
 
     def generate_class_body(self, data_type_name:str, field_dict:dict):
         # 主キーを特定
@@ -149,39 +149,41 @@ class RepositoryCsGenerator(CsSourceGeneratorBase):
 
         key_type = primary_key_type
         value_type = 'Master' + data_type_name
-        property_name = data_type_name
+        # property_name = data_type_name
         field_name = 'm_' + self.pascal_to_camel_case(data_type_name)
 
-        properties = ''
-        fields = ''
+        # getters = ''
+        # fields = ''
         # instantiations = ''
         initializations = ''
 
-        # e.g. public IMasterDataRepository<StageID, MasterStage> Stage { get => m_stage; }
-        properties += self.indent * 2 + 'public IMasterDataRepository<%s, %s> %s { get => %s; }\n' \
-            % (key_type, value_type, property_name, field_name)
-        # e.g. private MasterDataRepository<StageID, MasterStage> m_stage;
-        fields += self.indent * 2 + 'private MasterDataRepository<%s, %s> %s;\n' \
-            % (key_type, value_type, field_name)
+        # # e.g. public IMasterDataRepository<StageID, MasterStage> Stage { get => m_stage; }
+        # getters += self.indent * 2 + 'public IMasterDataRepository<%s, %s> %s { get => %s; }\n' \
+        #     % (key_type, value_type, property_name, field_name)
+        # # e.g. private MasterDataRepository<StageID, MasterStage> m_stage;
+        # fields += self.indent * 2 + 'private MasterDataRepository<%s, %s> %s;\n' \
+        #     % (key_type, value_type, field_name)
         # e.g. m_stage = new MasterDataRepository<StageID, MasterStage>();
-        initializations += self.indent * 3 + '// %s -------------------------\n' % (value_type)
-        initializations += self.indent * 3 + '%s = new MasterDataRepository<%s, %s>();\n' % (field_name, key_type, value_type)
-        self.generate_class_body_impl(properties, fields, initializations)
+        initializations += self.indent * 3 + 'm_data = new Dictionary<%s, %s>();\n' % (key_type, value_type)
+        self.generate_class_body_impl(key_type, value_type, initializations)
 
-    def generate_class_body_impl(self, properties:str, fields:str, initialization:str):
-        self.class_body  = self.indent + 'public static class MDRoot\n'
+    def generate_class_body_impl(self, key_type:str, value_type:str, initialization:str):
+        self.class_body  = self.indent + 'public class %sRepository\n' % value_type
+        # self.class_body += self.indent * 2 + 'IMasterDataRepository<%s, %s>\n' % (key_type, value_type)
         self.class_body += self.indent + '{\n'
-        self.class_body += self.begin_region('public getter')
-        self.class_body += properties
+        self.class_body += self.begin_region('public')
+        self.class_body += self.indent * 2 + 'public bool IsExist(%s id) => m_data.ContainsKey(id);\n' % key_type
+        self.class_body += self.indent * 2 + 'public %s At(%s id) => m_data[id];\n' % (value_type, key_type)
+        self.class_body += self.indent * 2 + 'public IReadOnlyDictionary<%s, %s> Data { get => m_data; }\n' % (key_type, value_type)
         self.class_body += self.switch_region('field')
-        self.class_body += fields
+        self.class_body += self.indent * 2 + 'private Dictionary<%s, %s> m_data;\n' % (key_type, value_type)
         self.class_body += self.switch_region('private function')
         self.class_body += self.indent * 2 + 'private void initialize()\n'
         self.class_body += self.indent * 2 + '{\n'
         self.class_body += initialization
         self.class_body += self.indent * 2 + '}\n'
         self.class_body += self.switch_region('ctor')
-        self.class_body += self.indent * 2 + 'public MDRoot() => initialize();\n'
+        self.class_body += self.indent * 2 + 'public %sRepository() => initialize();\n' % value_type
         self.class_body += self.end_region()
         self.class_body += self.indent + '}\n'
 
