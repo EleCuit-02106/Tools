@@ -8,8 +8,8 @@ logger = getLogger(__name__)
 import pprint
 
 class MDField:
-    VALID_TYPE_NAMES = ('int', 'float', 'string', 'Vec2', 'Vec3')
-    TYPE_DICT = { 'Vec2': 'Vector2', 'Vec3': 'Vector3' }
+    VALID_TYPE_NAMES = ('int', 'float', 'string', 'Vec2', 'Vec3', 'unixtime')
+    TYPE_DICT = { 'Vec2': 'Vector2', 'Vec3': 'Vector3', 'unixtime': 'int' }
     HEAVY_OBJECT = ('string', 'Vec2', 'Vec3')
 
     def __init__(self, name:str, type_attribute:str):
