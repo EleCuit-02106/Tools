@@ -95,13 +95,13 @@ class MDTypeInfo:
 # masterdata.toml全体を読み込み型情報に変換する
 class MDTypeManager:
     ROOT = 'root'
+
     def __init__(self):
         self.dict_toml = None
         self.dict_info = dict()
         self.dict_info[MDTypeManager.ROOT] = dict()
         self.load()
         self.read(self.dict_toml['masterdata'], '')
-        pprint.pprint(self.dict_info)
 
     def load(self):
         with open(ProjectPath.absolute('md_toml')) as f:
