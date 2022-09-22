@@ -16,7 +16,7 @@ IS_DEBUG = False
 # file_path に text を書き込むだけ
 def output(file_path:Path, text:str):
     os.makedirs(file_path.parent.absolute(), exist_ok=True)
-    logger.info('create file: %s' % file_path.relative_to(ProjectPath.absolute('md_impl')))
+    logger.info('create file: %s' % file_path)
     with open(file_path,'w') as f:
         f.write(text)
 
