@@ -78,36 +78,54 @@ class CsSourceGeneratorBase:
 class DataCsGenerator(CsSourceGeneratorBase):
     def generate_usings(self, md_type_info:MDTypeInfo):
         self.usings:str = ''
+        self.usings += 'using System;\n'
+        self.usings += 'using UnityEngine;\n'
         for using in md_type_info.using_list():
             self.usings += self.using_line(using)
 
     def generate_class_body(self, data_type_name:str, field_dict:dict):
+        self.class_body = ''
         properties = ''
+        field_declarations = ''
         ctor_declaration = self.indent * 2 + 'public Master%s(\n' % data_type_name
         ctor_definition = ''
         for field in field_dict.values():
             pass_type = field.pass_type
             property_name = self.camel_to_pascal_case(field.name)
             # e.g. public string Label { get; }
-            properties += self.indent * 2 + 'public %s %s { get; }\n' % (pass_type, property_name)
+            properties += self.indent * 2 + 'public %s %s { get => %s; }\n' % (pass_type, property_name, field.name)
+            # e.g. [SerializeField] private string label;
+            field_declarations += self.indent * 2 + '[SerializeField] private %s %s;\n' % (pass_type, field.name)
             # e.g. MasterHoge(string label, ... ) {
             ctor_declaration += self.indent * 3 + '%s %s,\n' % (pass_type, field.name)
             # e.g. Label = label;
-            ctor_definition += self.indent * 3 + '%s = %s;\n' % (property_name, field.name)
+            ctor_definition += self.indent * 3 + 'this.%s = %s;\n' % (field.name, field.name)
         ctor_declaration = ctor_declaration.rstrip(',\n')
         ctor_declaration += '\n' + self.indent * 2 + ') {\n'
         ctor_definition = ctor_definition.rstrip(',\n')
         ctor_definition += '\n' + self.indent * 2 + '}\n'
-        self.generate_class_body_impl(data_type_name, properties, ctor_declaration + ctor_definition)
+        self.generate_class_body_impl(data_type_name, properties, field_declarations, ctor_declaration + ctor_definition)
+        self.generate_list_class_impl(data_type_name)
 
-    def generate_class_body_impl(self, data_type_name:str, properties:str, constructor:str):
-        self.class_body  = self.indent + 'public class Master%s\n' % data_type_name
+    def generate_class_body_impl(self, data_type_name:str, properties:str, field_declarations:str, constructor:str):
+        self.class_body += self.indent + '[Serializable]\n'
+        self.class_body += self.indent + 'public sealed class Master%s\n' % data_type_name
         self.class_body += self.indent + '{\n'
-        self.class_body += self.begin_region('public getter')
+        self.class_body += self.begin_region('property')
         self.class_body += properties
+        self.class_body += self.switch_region('field')
+        self.class_body += field_declarations
         self.class_body += self.switch_region('ctor')
         self.class_body += constructor
         self.class_body += self.end_region()
+        self.class_body += self.indent + '}\n'
+
+    def generate_list_class_impl(self, data_type_name):
+        self.class_body += '\n'
+        self.class_body += self.indent + '[Serializable]\n'
+        self.class_body += self.indent + 'public sealed class Master%sList\n' % data_type_name
+        self.class_body += self.indent + '{\n'
+        self.class_body += self.indent * 2 + 'public Master%s[] data;\n' % data_type_name
         self.class_body += self.indent + '}\n'
 
 
