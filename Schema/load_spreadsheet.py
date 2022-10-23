@@ -117,7 +117,9 @@ class MasterDataConverter:
         dest_dir = ProjectPath.absolute('md_json')
         for md_type in self.records:
             dest_file = 'Master%s.json' % md_type
-            output(dest_dir / dest_file, rapidjson.dumps(self.records[md_type], indent=4))
+            full_dict = dict()
+            full_dict['data'] = list(self.records[md_type].values())
+            output(dest_dir / dest_file, rapidjson.dumps(full_dict, indent=4))
 
 if __name__ == "__main__":
     basicConfig(level=INFO)
