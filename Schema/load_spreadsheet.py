@@ -78,6 +78,7 @@ class MasterDataConverter:
 
     def _worksheet_to_json(self, worksheet:gspread.Worksheet):
         class_name = worksheet.title
+        logger.info('[MasterDataConverter.ConvertToJson] convert %s sheet' % class_name)
         if not class_name in self.records.keys():
             self.records[class_name] = dict()
         field_names = worksheet.row_values(1)
@@ -86,6 +87,8 @@ class MasterDataConverter:
         row = 4 # マスタデータのレコードは4行目から
         while True:
             record = worksheet.row_values(row)
+            while len(record) < len(field_types):
+                record.append("")
             if record is None or len(record) < id_column or record[id_column] == '':
                 break # id カラムが空なら全レコードを読み終わったとみなして終了する
             data = dict()
@@ -114,7 +117,9 @@ class MasterDataConverter:
         dest_dir = ProjectPath.absolute('md_json')
         for md_type in self.records:
             dest_file = 'Master%s.json' % md_type
-            output(dest_dir / dest_file, rapidjson.dumps(self.records[md_type]))
+            full_dict = dict()
+            full_dict['data'] = list(self.records[md_type].values())
+            output(dest_dir / dest_file, rapidjson.dumps(full_dict, indent=4))
 
 if __name__ == "__main__":
     basicConfig(level=INFO)

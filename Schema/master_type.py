@@ -21,7 +21,8 @@ class MDField:
         for attribute in attributes:
             if attribute == 'ID':
                 self.is_id = True
-                self.type_name = 'ID.' + self.type_name
+                self.type_name = 'int'
+                # TOdO: self.type_name = 'ID.' + self.type_name
             if attribute == 'PKey':
                 self.is_primary_key = True
         if not self.is_id:
@@ -33,7 +34,8 @@ class MDField:
     def read_types(self) -> tuple[str, str]:
         # メンバ変数の型
         if self.is_id:
-            raw_type = self.type_name + 'ID'
+            raw_type = 'int'
+            # TOdO: raw_type = self.type_name + 'ID'
         else:
             if self.type_name in MDField.TYPE_DICT:
                 raw_type = MDField.TYPE_DICT[self.type_name]

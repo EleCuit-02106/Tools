@@ -71,6 +71,45 @@ check and generate Master/UserClasses
       - settings.yaml を変更した場合は python を再起動すること
         - GoogleAuth() のインスタンスを作り直さないと変更が反映されず変なエラーが出たりする
         - e.g. InvalidConfigError: Unknown client_config_backend
+  - 一度ローカル保存してもセッションが切れると認証できなくなる
+    - エラーになった場合ローカルの保存ファイルを削除して再度実行するとブラウザで認証画面が表示される
+    - TOdO: 自動でファイル消すようにしたい & セッション切れないようにしたい
+    ~~~py
+    $ python load_spreadsheet.py
+    INFO:__main__:[MasterDataConverter] initialize ...
+    INFO:__main__:[MasterDataConverter] authorize ...
+    INFO:__main__:[MasterDataConverter] load file keys ...
+    INFO:__main__:[MasterDataConverter] load master data file list ...
+    INFO:oauth2client.client:Refreshing access_token
+    INFO:oauth2client.client:Failed to retrieve access token: {
+      "error": "invalid_grant",
+      "error_description": "Token has been expired or revoked."
+    }
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.9/site-packages/pydrive2/auth.py", line 668, in Refresh
+        self.credentials.refresh(self.http)
+      File "/usr/local/lib/python3.9/site-packages/oauth2client/client.py", line 545, in refresh
+        self._refresh(http)
+      File "/usr/local/lib/python3.9/site-packages/oauth2client/client.py", line 761, in _refresh
+        self._do_refresh_request(http)
+      File "/usr/local/lib/python3.9/site-packages/oauth2client/client.py", line 819, in _do_refresh_request
+        raise HttpAccessTokenRefreshError(error_msg, status=resp.status)
+    oauth2client.client.HttpAccessTokenRefreshError: invalid_grant: Token has been expired or revoked.
+
+    During handling of the above exception, another exception occurred:
+
+    Traceback (most recent call last):
+      File "/Users/kazuaki/develop/Unity/EleCuit/EleCuit/Client/Tools/Schema/load_spreadsheet.py", line 125, in <module>
+        mdConverter.load_file_keys()
+      File "/Users/kazuaki/develop/Unity/EleCuit/EleCuit/Client/Tools/Schema/load_spreadsheet.py", line 41, in load_file_keys
+        self.g_auth.LocalWebserverAuth()
+      File "/usr/local/lib/python3.9/site-packages/pydrive2/auth.py", line 131, in _decorated
+        self.Refresh()
+      File "/usr/local/lib/python3.9/site-packages/pydrive2/auth.py", line 670, in Refresh
+        raise RefreshError("Access token refresh failed: %s" % error)
+    pydrive2.auth.RefreshError: Access token refresh failed: invalid_grant: Token has been expired or revoked.
+    ~~~
+
 
 
 

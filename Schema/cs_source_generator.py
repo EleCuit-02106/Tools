@@ -78,36 +78,54 @@ class CsSourceGeneratorBase:
 class DataCsGenerator(CsSourceGeneratorBase):
     def generate_usings(self, md_type_info:MDTypeInfo):
         self.usings:str = ''
+        self.usings += 'using System;\n'
+        self.usings += 'using UnityEngine;\n'
         for using in md_type_info.using_list():
             self.usings += self.using_line(using)
 
     def generate_class_body(self, data_type_name:str, field_dict:dict):
+        self.class_body = ''
         properties = ''
+        field_declarations = ''
         ctor_declaration = self.indent * 2 + 'public Master%s(\n' % data_type_name
         ctor_definition = ''
         for field in field_dict.values():
             pass_type = field.pass_type
             property_name = self.camel_to_pascal_case(field.name)
             # e.g. public string Label { get; }
-            properties += self.indent * 2 + 'public %s %s { get; }\n' % (pass_type, property_name)
+            properties += self.indent * 2 + 'public %s %s => %s;\n' % (pass_type, property_name, field.name)
+            # e.g. [SerializeField] private string label;
+            field_declarations += self.indent * 2 + '[SerializeField] private %s %s;\n' % (pass_type, field.name)
             # e.g. MasterHoge(string label, ... ) {
             ctor_declaration += self.indent * 3 + '%s %s,\n' % (pass_type, field.name)
             # e.g. Label = label;
-            ctor_definition += self.indent * 3 + '%s = %s;\n' % (property_name, field.name)
+            ctor_definition += self.indent * 3 + 'this.%s = %s;\n' % (field.name, field.name)
         ctor_declaration = ctor_declaration.rstrip(',\n')
-        ctor_declaration += '\n' + self.indent * 2 + ') {\n'
+        ctor_declaration += ')\n' + self.indent * 2 + '{\n'
         ctor_definition = ctor_definition.rstrip(',\n')
         ctor_definition += '\n' + self.indent * 2 + '}\n'
-        self.generate_class_body_impl(data_type_name, properties, ctor_declaration + ctor_definition)
+        self.generate_class_body_impl(data_type_name, properties, field_declarations, ctor_declaration + ctor_definition)
+        self.generate_list_class_impl(data_type_name)
 
-    def generate_class_body_impl(self, data_type_name:str, properties:str, constructor:str):
-        self.class_body  = self.indent + 'public class Master%s\n' % data_type_name
+    def generate_class_body_impl(self, data_type_name:str, properties:str, field_declarations:str, constructor:str):
+        self.class_body += self.indent + '[Serializable]\n'
+        self.class_body += self.indent + 'public sealed class Master%s\n' % data_type_name
         self.class_body += self.indent + '{\n'
-        self.class_body += self.begin_region('public getter')
+        self.class_body += self.begin_region('property')
         self.class_body += properties
+        self.class_body += self.switch_region('field')
+        self.class_body += field_declarations
         self.class_body += self.switch_region('ctor')
         self.class_body += constructor
         self.class_body += self.end_region()
+        self.class_body += self.indent + '}\n'
+
+    def generate_list_class_impl(self, data_type_name):
+        self.class_body += '\n'
+        self.class_body += self.indent + '[Serializable]\n'
+        self.class_body += self.indent + 'public sealed class Master%sList\n' % data_type_name
+        self.class_body += self.indent + '{\n'
+        self.class_body += self.indent * 2 + 'public Master%s[] data;\n' % data_type_name
         self.class_body += self.indent + '}\n'
 
 
@@ -115,6 +133,7 @@ class RepositoryCsGenerator(CsSourceGeneratorBase):
     def generate_usings(self, md_type_info:MDTypeInfo):
         self.usings:str = ''
         self.usings += 'using System.Collections.Generic;\n'
+        self.usings += 'using Cysharp.Threading.Tasks;\n'
 
     def generate_class_body(self, data_type_name:str, field_dict:dict):
         # 主キーを特定
@@ -128,7 +147,7 @@ class RepositoryCsGenerator(CsSourceGeneratorBase):
         self.generate_class_body_impl(primary_key_type, 'Master' + data_type_name)
 
     def generate_class_body_impl(self, key_type:str, value_type:str):
-        self.class_body  = self.indent + 'public class %sRepository\n' % value_type
+        self.class_body  = self.indent + 'public class %sRepository : du.Cmp.Singleton<%sRepository>\n' % (value_type, value_type)
         self.class_body += self.indent + '{\n'
         self.class_body += self.begin_region('public')
         self.class_body += self.indent * 2 + 'public bool IsExist(%s id) => m_data.ContainsKey(id);\n' % key_type
@@ -137,12 +156,19 @@ class RepositoryCsGenerator(CsSourceGeneratorBase):
         self.class_body += self.switch_region('field')
         self.class_body += self.indent * 2 + 'private Dictionary<%s, %s> m_data;\n' % (key_type, value_type)
         self.class_body += self.switch_region('private function')
-        self.class_body += self.indent * 2 + 'private void initialize()\n'
+        self.class_body += self.indent * 2 + 'public async UniTask Load()\n'
         self.class_body += self.indent * 2 + '{\n'
+        self.class_body += self.indent * 3 + 'if (m_data != null) { return; }\n'
         self.class_body += self.indent * 3 + 'm_data = new Dictionary<%s, %s>();\n' % (key_type, value_type)
+        self.class_body += self.indent * 3 + 'string assetAddress = global::EC.Adds.MasterJson + "%s" + ".json";\n' % value_type
+        self.class_body += self.indent * 3 + 'var task = du.File.FileUtils.LoadTextFileFull(assetAddress);\n'
+        self.class_body += self.indent * 3 + 'string mdRecordsAsJson = await task;\n'
+        self.class_body += self.indent * 3 + 'var mdList = UnityEngine.JsonUtility.FromJson<%sList>(mdRecordsAsJson);\n' % value_type
+        self.class_body += self.indent * 3 + 'foreach (var record in mdList.data)\n'
+        self.class_body += self.indent * 3 + '{\n'
+        self.class_body += self.indent * 4 + 'm_data.Add(record.Id, record);\n'
+        self.class_body += self.indent * 3 + '}\n'
         self.class_body += self.indent * 2 + '}\n'
-        self.class_body += self.switch_region('ctor')
-        self.class_body += self.indent * 2 + 'public %sRepository() => initialize();\n' % value_type
         self.class_body += self.end_region()
         self.class_body += self.indent + '}\n'
 
@@ -159,7 +185,7 @@ class RepositoryCsCppGenerator(CsSourceGeneratorBase):
         for field in field_dict.values():
             if field.is_primary_key:
                 primary_key = field
-        self.class_body  = 'void Master%sRepository::initialize() {\n' % data_type_name
+        self.class_body  = 'void Master%sRepository::Initialize() {\n' % data_type_name
         self.class_body += self.indent + 'const dx::toml::TomlAsset toml(U"%s");\n' % (data_type_name)
         self.class_body += self.indent + 'const dx::toml::TomlKey key(U"masterdata");\n'
         self.class_body += self.indent + 's3d::TOMLTableView table = toml[key].tableView();\n'
