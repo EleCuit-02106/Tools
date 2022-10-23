@@ -87,6 +87,8 @@ class MasterDataConverter:
         row = 4 # マスタデータのレコードは4行目から
         while True:
             record = worksheet.row_values(row)
+            while len(record) < len(field_types):
+                record.append("")
             if record is None or len(record) < id_column or record[id_column] == '':
                 break # id カラムが空なら全レコードを読み終わったとみなして終了する
             data = dict()
