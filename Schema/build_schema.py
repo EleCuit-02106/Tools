@@ -4,7 +4,7 @@
 from pathlib import Path
 import sys
 import os
-import shutil
+import glob
 from repository_path import ProjectPath
 from cs_source_generator import DataCsGenerator, RepositoryCsGenerator
 from master_type import MDTypeInfo, MDTypeManager
@@ -52,6 +52,11 @@ def create_cs_sources(mgr:MDTypeManager, path_dst:Path):
         for value in mgr.dict_info[key].values():
             create_cs_sources_impl(value, path_dst, key)
 
+def remove_cs_files(path: str):
+    for p in glob.glob(path, recursive=True):
+        if os.path.isfile(p):
+            os.remove(p)
+
 if __name__ == "__main__":
     basicConfig(level=INFO)
     args = sys.argv
@@ -59,6 +64,6 @@ if __name__ == "__main__":
 
     dest_dir = ProjectPath.absolute('md_impl')
     if not IS_DEBUG and os.path.isdir(dest_dir):
-        shutil.rmtree(dest_dir)
+        remove_cs_files(str(dest_dir) + "/**/*.cs")
     mgr = MDTypeManager()
     create_cs_sources(mgr, dest_dir)
