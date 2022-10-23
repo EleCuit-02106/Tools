@@ -93,7 +93,7 @@ class DataCsGenerator(CsSourceGeneratorBase):
             pass_type = field.pass_type
             property_name = self.camel_to_pascal_case(field.name)
             # e.g. public string Label { get; }
-            properties += self.indent * 2 + 'public %s %s { get => %s; }\n' % (pass_type, property_name, field.name)
+            properties += self.indent * 2 + 'public %s %s => %s;\n' % (pass_type, property_name, field.name)
             # e.g. [SerializeField] private string label;
             field_declarations += self.indent * 2 + '[SerializeField] private %s %s;\n' % (pass_type, field.name)
             # e.g. MasterHoge(string label, ... ) {
