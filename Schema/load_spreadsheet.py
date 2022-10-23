@@ -78,6 +78,7 @@ class MasterDataConverter:
 
     def _worksheet_to_json(self, worksheet:gspread.Worksheet):
         class_name = worksheet.title
+        logger.info('[MasterDataConverter.ConvertToJson] convert %s sheet' % class_name)
         if not class_name in self.records.keys():
             self.records[class_name] = dict()
         field_names = worksheet.row_values(1)
