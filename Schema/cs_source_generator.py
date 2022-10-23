@@ -101,7 +101,7 @@ class DataCsGenerator(CsSourceGeneratorBase):
             # e.g. Label = label;
             ctor_definition += self.indent * 3 + 'this.%s = %s;\n' % (field.name, field.name)
         ctor_declaration = ctor_declaration.rstrip(',\n')
-        ctor_declaration += '\n' + self.indent * 2 + ') {\n'
+        ctor_declaration += ')\n' + self.indent * 2 + '{\n'
         ctor_definition = ctor_definition.rstrip(',\n')
         ctor_definition += '\n' + self.indent * 2 + '}\n'
         self.generate_class_body_impl(data_type_name, properties, field_declarations, ctor_declaration + ctor_definition)
