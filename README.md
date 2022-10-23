@@ -72,6 +72,8 @@ check and generate Master/UserClasses
         - GoogleAuth() のインスタンスを作り直さないと変更が反映されず変なエラーが出たりする
         - e.g. InvalidConfigError: Unknown client_config_backend
   - 一度ローカル保存してもセッションが切れると認証できなくなる
+    - エラーになった場合ローカルの保存ファイルを削除して再度実行するとブラウザで認証画面が表示される
+    - TOdO: 自動でファイル消すようにしたい & セッション切れないようにしたい
     ~~~py
     $ python load_spreadsheet.py
     INFO:__main__:[MasterDataConverter] initialize ...
